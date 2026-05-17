@@ -103,8 +103,9 @@ export default function Home() {
     if (usageData.count >= 2) {
       setTimeout(() => {
         setResult({
-          cleaned_content: `⚠️ FREE TIER LIMIT REACHED (2/2)\n\nCustom URL purification is capped at 2 free searches per day to prevent server abuse.\n\nTo unlock unlimited processing on any website, please upgrade to PRO or use our 1-Click Chrome Extension below.`,
-          token_saved_percent: '0.00%'
+          cleaned_content: `⚠️ FREE TIER LIMIT REACHED (2/2)\n\nCustom URL purification is capped at 2 free searches per day to prevent server abuse.\n\nTo unlock unlimited processing on any website, please pre-order our 1-Click Chrome Extension below!`,
+          token_saved_percent: '0.00%',
+          is_system_msg: true
         });
         setLoading(false);
       }, 200);
@@ -119,6 +120,19 @@ export default function Home() {
         body: JSON.stringify({ url: targetUrl })
       });
       const data = await res.json();
+      
+      const rawText = data.cleaned_content || data.markdown || data.cleaned_text || data.content || data.text || '';
+      
+      // 🧠 防火牆攔截晶片：如果被 Allrecipes 等網站擋住，轉化為推銷文案
+      if (rawText.includes('access issue') || rawText.includes('support@people.inc') || rawText.includes('Proxy') || rawText.includes('Cloudflare')) {
+        setResult({
+          cleaned_content: `🔒 COOKING BLOG FIREWALL DETECTED\n\nThis website is actively blocking cloud servers from extracting their recipes.\n\n💡 THE FIX: Our upcoming 1-Click Chrome Extension runs locally on your browser, making it 100% IMMUNE to this server block! Pre-order it below to bypass all firewalls seamlessly.`,
+          token_saved_percent: '0.00%',
+          is_system_msg: true
+        });
+        setLoading(false);
+        return;
+      }
       
       // 成功扣除一次免費額度並寫入硬碟
       usageData.count += 1;
@@ -139,9 +153,10 @@ export default function Home() {
   };
 
   const previewText = getCleanedText();
+  const isLocked = previewText.includes('LIMIT REACHED') || previewText.includes('FIREWALL DETECTED');
 
   const downloadToNotes = () => {
-    if (!previewText || previewText.includes('LIMIT REACHED')) return;
+    if (!previewText || isLocked) return;
     const element = document.createElement("a");
     const file = new Blob([previewText], { type: 'text/plain;charset=utf-8' });
     element.href = URL.createObjectURL(file);
@@ -152,7 +167,7 @@ export default function Home() {
   };
 
   const copyToClipboard = () => {
-    if (!previewText || previewText.includes('LIMIT REACHED')) return;
+    if (!previewText || isLocked) return;
     navigator.clipboard.writeText(previewText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -250,42 +265,42 @@ export default function Home() {
             
             <div className="flex items-center justify-between">
               <h2 className="text-lg text-neutral-800 font-bold tracking-tight">Purified Content Box</h2>
-              <span className={`text-xs px-2.5 py-1 rounded-full font-semibold animate-pulse ${previewText.includes('LIMIT REACHED') ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
-                {previewText.includes('LIMIT REACHED') ? 'Access Blocked' : (result.token_saved_percent ?? '95.00%') + ' Bloat Removed'}
+              <span className={`text-xs px-2.5 py-1 rounded-full font-semibold animate-pulse ${result.is_system_msg ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+                {result.is_system_msg ? 'System Notice' : (result.token_saved_percent ?? '95.00%') + ' Bloat Removed'}
               </span>
             </div>
 
             {/* 文本預覽區 */}
             {previewText && (
-              <div className={`relative p-4 rounded-xl border overflow-hidden shadow-inner ${previewText.includes('LIMIT REACHED') ? 'bg-red-50/50 border-red-100' : 'bg-neutral-50 border-neutral-100'}`}>
-                <div className={`text-sm font-sans h-64 overflow-y-auto overflow-x-hidden break-words whitespace-pre-wrap p-1 leading-relaxed antialiased ${previewText.includes('LIMIT REACHED') ? 'text-red-700 font-semibold' : 'text-neutral-700'}`}>
+              <div className={`relative p-4 rounded-xl border overflow-hidden shadow-inner ${result.is_system_msg ? 'bg-amber-50/40 border-amber-100' : 'bg-neutral-50 border-neutral-100'}`}>
+                <div className={`text-sm font-sans h-64 overflow-y-auto overflow-x-hidden break-words whitespace-pre-wrap p-1 leading-relaxed antialiased ${result.is_system_msg ? 'text-amber-900 font-medium' : 'text-neutral-700'}`}>
                   {previewText.substring(0, 3000)}
                 </div>
               </div>
             )}
 
-            {/* 手機操作列 (鎖死狀態下按鈕會反灰不能點) */}
+            {/* 手機操作列 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button 
                 onClick={downloadToNotes}
-                disabled={previewText.includes('LIMIT REACHED')}
+                disabled={isLocked}
                 className="py-3 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 📥 Download for Notes
               </button>
               <button 
                 onClick={copyToClipboard}
-                disabled={previewText.includes('LIMIT REACHED')}
+                disabled={isLocked}
                 className="py-3 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {copied ? '✅ Copied!' : '📋 Copy to Clipboard'}
               </button>
             </div>
 
-            {/* 💳 終極變現付費牆 */}
+            {/* 💳 終極變現預購牆 */}
             <div className="pt-6 border-t border-neutral-100 space-y-3 mt-4">
               <div className="text-xs text-neutral-400 text-center font-medium">
-                Like the speed? Get the 1-Click Chrome Extension to purify pages instantly.
+                Our Chrome Extension is pending Web Store approval. Secure your VIP spot now!
               </div>
               <a 
                 href="https://ko-fi.com/agentlens/tiers" 
@@ -293,7 +308,7 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="block w-full py-4 bg-neutral-900 text-white font-bold text-center rounded-xl hover:bg-black transition-all shadow-lg hover:shadow-xl transform active:scale-95 ring-2 ring-transparent hover:ring-neutral-400"
               >
-                Unlock Unlimited Access ($1.99/mo)
+                Pre-order PRO Access ($1.99)
               </a>
             </div>
 
