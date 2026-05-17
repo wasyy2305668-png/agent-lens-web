@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* 📱 手機完美響應防護罩 */
 @media (max-width: 640px) {
   /* 防止手機瀏覽器點擊按鈕時出現奇怪的藍色高光框 */
