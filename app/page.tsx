@@ -50,100 +50,125 @@ export default function Home() {
   };
 
   return (
-    // 🎨 背景換成溫暖優雅的米白書卷色 (#fbfbfa)，文字換成深炭黑，視覺瞬間變高級、安全
+    // 🎨 背景溫暖優雅的米白書卷色 (#fbfbfa)
     <main className="min-h-screen bg-[#fbfbfa] text-neutral-800 flex flex-col items-center justify-start px-4 py-16 sm:p-8 overflow-y-auto selection:bg-amber-200">
       <div className="max-w-2xl w-full space-y-8 text-center my-auto">
         
-        {/* 🟢 狀態列：改為精緻的白底灰色調，營造 24 小時高可用性的專業感 */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-neutral-200 text-xs text-neutral-500 mx-auto shadow-sm">
+        {/* 🟢 狀態列 */}
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-neutral-200 text-xs text-neutral-500 mx-auto shadow-sm transition-transform hover:scale-105">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>Engine Status: Operational</span>
           <span className="text-neutral-300">|</span>
           <span className="text-emerald-600 font-medium">Purify Speed: 1s</span>
         </div>
 
-        {/* 🎯 B2C 核心文案：直擊痛點，3,000-word 換成醒目的珊瑚紅 */}
+        {/* 🎯 B2C 核心文案 */}
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight text-neutral-900">
-          Tired of <span className="text-orange-600">3,000-word</span> life stories just to get a recipe?
+          Tired of <span className="text-orange-600 animate-pulse">3,000-word</span> life stories just to get a recipe?
         </h1>
         <p className="text-neutral-500 text-base sm:text-lg max-w-xl mx-auto">
           Instantly strip ads, pop-ups, and endless fluff from any cooking or news blog. Save directly to your mobile notes.
         </p>
 
-        {/* 🚀 輸入框區塊：換成白底、細邊框、搭配高質感深翡翠綠 (emerald) 的下載按鈕 */}
-        <div className="flex flex-col sm:flex-row gap-4 w-full mt-8">
-          <input 
-            type="text" 
-            placeholder="Paste any recipe or blog URL (e.g., https://...)" 
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="w-full sm:flex-1 px-4 py-3 rounded-xl bg-white border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-emerald-600 shadow-sm transition-all"
-          />
-          <button 
-            onClick={testUrl}
-            disabled={loading}
-            className="w-full sm:w-auto px-8 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold transition-all disabled:opacity-50 whitespace-nowrap shadow-sm"
-          >
-            {loading ? 'Purifying...' : 'Get Just The Text'}
-          </button>
+        {/* 🚀 輸入框區塊 */}
+        <div className="w-full mt-8">
+          <div className="flex flex-col sm:flex-row gap-4 w-full">
+            <input 
+              type="text" 
+              placeholder="Paste any recipe or blog URL (e.g., https://...)" 
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="w-full sm:flex-1 px-4 py-3 rounded-xl bg-white border border-neutral-200 text-neutral-900 placeholder-neutral-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 shadow-sm transition-all"
+            />
+            <button 
+              onClick={testUrl}
+              disabled={loading}
+              className="w-full sm:w-auto px-8 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl font-bold transition-all disabled:opacity-50 whitespace-nowrap shadow-md hover:shadow-lg transform active:scale-95"
+            >
+              {loading ? 'Purifying...' : 'Get Just The Text'}
+            </button>
+          </div>
+
+          {/* ✨ 零摩擦測試範例：注入微互動生命力 */}
+          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm font-medium">
+            <span className="text-neutral-400">💡 Try these famous fluff examples:</span>
+            <button 
+              onClick={() => setUrl("https://sallysbakingaddiction.com/chewy-chocolate-chip-cookies/")}
+              className="rounded-full bg-orange-50 border border-orange-100 px-4 py-1.5 text-orange-600 transition-all hover:bg-orange-100 hover:-translate-y-0.5 hover:shadow-sm active:scale-95"
+            >
+              🍪 Sally's Cookies
+            </button>
+            <button 
+              onClick={() => setUrl("https://pinchofyum.com/the-best-detox-crockpot-lentil-soup/")}
+              className="rounded-full bg-emerald-50 border border-emerald-100 px-4 py-1.5 text-emerald-600 transition-all hover:bg-emerald-100 hover:-translate-y-0.5 hover:shadow-sm active:scale-95"
+            >
+              🍲 Pinch of Yum
+            </button>
+            <button 
+              onClick={() => setUrl("https://www.allrecipes.com/recipe/10813/best-chocolate-chip-cookies/")}
+              className="rounded-full bg-blue-50 border border-blue-100 px-4 py-1.5 text-blue-600 transition-all hover:bg-blue-100 hover:-translate-y-0.5 hover:shadow-sm active:scale-95"
+            >
+              🍽️ Allrecipes Classic
+            </button>
+          </div>
         </div>
 
-        {/* 🛡️ 信任增強方塊：全面改成乾淨的文藝雜誌風格，建立極致信任 */}
+        {/* 🛡️ 信任增強方塊 */}
         {!result && (
           <div className="mt-12 grid grid-cols-2 gap-4 text-left text-xs text-neutral-500 font-medium">
-            <div className="p-4 bg-white border border-neutral-100 rounded-xl shadow-sm">
+            <div className="p-4 bg-white border border-neutral-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
               <span className="text-emerald-600 font-bold mr-1.5">✓</span> 100% Ad & Cookie Blocker
             </div>
-            <div className="p-4 bg-white border border-neutral-100 rounded-xl shadow-sm">
+            <div className="p-4 bg-white border border-neutral-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
               <span className="text-emerald-600 font-bold mr-1.5">✓</span> Smart Fluff Extraction
             </div>
-            <div className="p-4 bg-white border border-neutral-100 rounded-xl shadow-sm">
+            <div className="p-4 bg-white border border-neutral-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
               <span className="text-emerald-600 font-bold mr-1.5">✓</span> Export to Phone Notes (.txt)
             </div>
-            <div className="p-4 bg-white border border-neutral-100 rounded-xl shadow-sm">
+            <div className="p-4 bg-white border border-neutral-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
               <span className="text-emerald-600 font-bold mr-1.5">✓</span> 1-Click Browser Extension
             </div>
           </div>
         )}
 
-        {/* 結果展示區塊：主卡片變成純白，帶有柔軟的微陰影，消除廉價感 */}
+        {/* 結果展示區塊 */}
         {result && !result.detail && (
-          <div className="mt-8 sm:mt-12 p-6 sm:p-8 bg-white border border-neutral-200/60 rounded-2xl text-left space-y-6 shadow-md transition-all animate-fade-in">
+          <div className="mt-8 sm:mt-12 p-6 sm:p-8 bg-white border border-neutral-200/60 rounded-2xl text-left space-y-6 shadow-xl transition-all animate-fade-in ring-1 ring-black/5">
             
             <div className="flex items-center justify-between">
               <h2 className="text-lg text-neutral-800 font-bold tracking-tight">Purified Content Box</h2>
-              <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-semibold">
+              <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-semibold animate-pulse">
                 {result.token_saved_percent ?? '90%'} Bloat Removed
               </span>
             </div>
 
-            {/* 文本預覽區：背景換成溫柔的冷灰 (#f8f9fa)，像在看 iPad 上的電子書一樣舒服 */}
+            {/* 文本預覽區 */}
             {previewText && (
-              <div className="relative p-4 bg-neutral-50 rounded-xl border border-neutral-100 overflow-hidden">
+              <div className="relative p-4 bg-neutral-50 rounded-xl border border-neutral-100 overflow-hidden shadow-inner">
                 <div className="text-sm text-neutral-700 font-sans h-64 overflow-y-auto overflow-x-hidden break-words whitespace-pre-wrap p-1 leading-relaxed antialiased">
                   {previewText.substring(0, 3000)}
                 </div>
               </div>
             )}
 
-            {/* 手機操作列：改為沉穩、高質感的淺灰白實體按鈕 */}
+            {/* 手機操作列 */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button 
                 onClick={downloadToNotes}
-                className="py-3 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm"
+                className="py-3 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-95"
               >
                 📥 Download for Notes
               </button>
               <button 
                 onClick={copyToClipboard}
-                className="py-3 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-sm font-semibold rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm"
+                className="py-3 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-95"
               >
                 {copied ? '✅ Copied!' : '📋 Copy to Clipboard'}
               </button>
             </div>
 
-            {/* 💳 終極變現付費牆：按鈕直接換成無情、強烈的高階「純黑金屬質感按鈕」 */}
-            <div className="pt-4 border-t border-neutral-100 space-y-3">
+            {/* 💳 終極變現付費牆 */}
+            <div className="pt-6 border-t border-neutral-100 space-y-3 mt-4">
               <div className="text-xs text-neutral-400 text-center font-medium">
                 Like the speed? Get the 1-Click Chrome Extension to purify pages instantly.
               </div>
@@ -151,7 +176,7 @@ export default function Home() {
                 href="https://ko-fi.com/agentlens/tiers" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="block w-full py-4 bg-neutral-900 text-white font-bold text-center rounded-xl hover:bg-neutral-800 transition-colors shadow-md transform active:scale-[0.99]"
+                className="block w-full py-4 bg-neutral-900 text-white font-bold text-center rounded-xl hover:bg-black transition-all shadow-lg hover:shadow-xl transform active:scale-95 ring-2 ring-transparent hover:ring-neutral-400"
               >
                 Unlock Unlimited Access ($1.99/mo)
               </a>
