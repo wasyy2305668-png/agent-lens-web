@@ -1,5 +1,4 @@
 'use client';
-// trigger vercel build
 import { useState } from 'react';
 
 export default function Home() {
@@ -108,10 +107,10 @@ export default function Home() {
                 🍲 Pinch of Yum
               </button>
               <button 
-                onClick={() => setUrl("https://www.allrecipes.com/recipe/10813/best-chocolate-chip-cookies/")}
+                onClick={() => setUrl("https://smittenkitchen.com/2023/11/big-crumb-pie-dough/")}
                 className="rounded-full bg-blue-50 border border-blue-100 px-4 py-1.5 text-xs sm:text-sm text-blue-600 font-medium transition-all hover:bg-blue-100 hover:-translate-y-0.5 hover:shadow-sm active:scale-95"
               >
-                🍽️ Allrecipes
+                🥧 Smitten Kitchen
               </button>
             </div>
           </div>
