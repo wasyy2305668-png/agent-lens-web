@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // 🧠 本地資料庫：0 成本、0 延遲，100% 繞過 Cloudflare，誘餌專用
 const MOCK_RECIPES: Record<string, string> = {
@@ -62,6 +62,17 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [copied, setCopied] = useState(false);
+  
+  // 🔑 PRO 狀態與驗證碼管理
+  const [isPro, setIsPro] = useState(false);
+  const [inputCode, setInputCode] = useState('');
+
+  // 判定本地是否已啟動過 PRO 權限
+  useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem('purifier_pro') === 'true') {
+      setIsPro(true);
+    }
+  }, []);
 
   // 🚀 核心大腦：自動判斷要走 Mock 還是真實 API
   const handleTriggerUrl = async (targetUrl: string, key?: string) => {
@@ -89,7 +100,7 @@ export default function Home() {
       return;
     }
 
-    // 2. 🚨 啟動「無情 2 次斷糧晶片」（保護你 7 鎂的 Render 伺服器）
+    // 2. 🚨 啟動「無情 2 次斷糧晶片」（如果是 PRO 用戶直接放行無視限制）
     const today = new Date().toDateString();
     const localUsage = localStorage.getItem('purifier_usage');
     let usageData = localUsage ? JSON.parse(localUsage) : { date: today, count: 0 };
@@ -99,13 +110,14 @@ export default function Home() {
       usageData = { date: today, count: 0 };
     }
 
-    // 只要超過 2 次，直接鎖死，噴出付費通知
-    if (usageData.count >= 2) {
+    // 只要超過 2 次且不是 PRO，直接鎖死並製造時間焦慮
+    if (!isPro && usageData.count >= 2) {
       setTimeout(() => {
         setResult({
-          cleaned_content: `⚠️ FREE TIER LIMIT REACHED (2/2)\n\nCustom URL purification is capped at 2 free searches per day to prevent server abuse.\n\nTo unlock unlimited processing on any website, please pre-order our 1-Click Chrome Extension below!`,
+          cleaned_content: `⚠️ FREE TIER LIMIT REACHED (2/2)\n\nYour 2 free daily custom searches have been used up for today.\n\n⏳ Remaining quota resets automatically at Midnight (00:00 local time).\n\nDon't want to wait until tomorrow? Pre-order our 1-Click Chrome Extension right now to unlock instant, unlimited processing on any website!`,
           token_saved_percent: '0.00%',
-          is_system_msg: true
+          is_system_msg: true,
+          show_unlock_gate: true
         });
         setLoading(false);
       }, 200);
@@ -123,26 +135,42 @@ export default function Home() {
       
       const rawText = data.cleaned_content || data.markdown || data.cleaned_text || data.content || data.text || '';
       
-      // 🧠 防火牆攔截晶片：如果被 Allrecipes 等網站擋住，轉化為推銷文案
+      // 🧠 防火牆攔截晶片：如果被 Allrecipes 等網站擋住，轉化為推銷與解鎖文案
       if (rawText.includes('access issue') || rawText.includes('support@people.inc') || rawText.includes('Proxy') || rawText.includes('Cloudflare')) {
         setResult({
           cleaned_content: `🔒 COOKING BLOG FIREWALL DETECTED\n\nThis website is actively blocking cloud servers from extracting their recipes.\n\n💡 THE FIX: Our upcoming 1-Click Chrome Extension runs locally on your browser, making it 100% IMMUNE to this server block! Pre-order it below to bypass all firewalls seamlessly.`,
           token_saved_percent: '0.00%',
-          is_system_msg: true
+          is_system_msg: true,
+          show_unlock_gate: true
         });
         setLoading(false);
         return;
       }
       
-      // 成功扣除一次免費額度並寫入硬碟
-      usageData.count += 1;
-      localStorage.setItem('purifier_usage', JSON.stringify(usageData));
+      // 成功扣除一次免費額度（PRO 用戶不扣額度）
+      if (!isPro) {
+        usageData.count += 1;
+        localStorage.setItem('purifier_usage', JSON.stringify(usageData));
+      }
       
       setResult(data);
     } catch (error) {
       alert("Server is busy cooking. Try again in 10 seconds!");
     }
     setLoading(false);
+  };
+
+  // 🔑 暗號解鎖處理主邏輯
+  const handleActivatePro = (explicitCode?: string) => {
+    const codeToVerify = explicitCode || inputCode;
+    if (codeToVerify.trim() === 'PURIFY2026') {
+      localStorage.setItem('purifier_pro', 'true');
+      setIsPro(true);
+      alert('🎉 PRO Access Unlocked! Enjoy unlimited web purifications.');
+      setResult(null); // 清空付費提示
+    } else {
+      alert('Invalid Activation Code. Please check your Ko-fi receipt!');
+    }
   };
 
   // 🧹 清洗文字：徹底把 # 和 * 號拔除
@@ -153,7 +181,7 @@ export default function Home() {
   };
 
   const previewText = getCleanedText();
-  const isLocked = previewText.includes('LIMIT REACHED') || previewText.includes('FIREWALL DETECTED');
+  const isLocked = !isPro && (previewText.includes('LIMIT REACHED') || previewText.includes('FIREWALL DETECTED'));
 
   const downloadToNotes = () => {
     if (!previewText || isLocked) return;
@@ -174,14 +202,28 @@ export default function Home() {
   };
 
   return (
-    // 🎨 背景溫暖優雅的米白書卷色 (#fbfbfa)
+    // 🎨 背景溫慢優雅的米白書卷色 (#fbfbfa)
     <main className="min-h-screen bg-[#fbfbfa] text-neutral-800 flex flex-col items-center justify-start px-4 py-16 sm:p-8 overflow-y-auto selection:bg-amber-200">
       <div className="max-w-2xl w-full space-y-8 text-center my-auto">
         
-        {/* 🟢 狀態列 */}
+        {/* 🟢 狀態列 + 頂部隨時解鎖快速通道 */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-neutral-200 text-xs text-neutral-500 mx-auto shadow-sm transition-transform hover:scale-105">
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>Engine Status: Operational</span>
+          <span className="text-neutral-300">|</span>
+          {isPro ? (
+            <span className="text-emerald-600 font-bold">PRO ACTIVE</span>
+          ) : (
+            <button 
+              onClick={() => {
+                const code = prompt('Enter your Ko-fi Activation Code to unlock PRO:');
+                if (code) handleActivatePro(code);
+              }}
+              className="text-neutral-400 hover:text-emerald-600 underline font-medium cursor-pointer"
+            >
+              Already PRO?
+            </button>
+          )}
           <span className="text-neutral-300">|</span>
           <span className="text-emerald-600 font-medium">Purify Speed: 1s</span>
         </div>
@@ -274,8 +316,30 @@ export default function Home() {
             {previewText && (
               <div className={`relative p-4 rounded-xl border overflow-hidden shadow-inner ${result.is_system_msg ? 'bg-amber-50/40 border-amber-100' : 'bg-neutral-50 border-neutral-100'}`}>
                 <div className={`text-sm font-sans h-64 overflow-y-auto overflow-x-hidden break-words whitespace-pre-wrap p-1 leading-relaxed antialiased ${result.is_system_msg ? 'text-amber-900 font-medium' : 'text-neutral-700'}`}>
-                  {previewText.substring(0, 3000)}
+                  {previewText}
                 </div>
+
+                {/* 🔑 密碼解鎖晶片介面：當觸發付費牆或被防火牆干擾，且非 PRO 用戶時顯示 */}
+                {result.show_unlock_gate && !isPro && (
+                  <div className="mt-4 pt-4 border-t border-amber-200 text-left">
+                    <p className="text-xs text-amber-700 font-bold">Already a PRO supporter? Enter your Ko-fi Activation Code to unlock unlimited web access instantly:</p>
+                    <div className="flex gap-2 mt-2">
+                      <input 
+                        type="text" 
+                        placeholder="Paste your code (e.g. PURIFY2026)" 
+                        value={inputCode}
+                        onChange={(e) => setInputCode(e.target.value)}
+                        className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-amber-300 bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 text-neutral-900 font-sans"
+                      />
+                      <button 
+                        onClick={() => handleActivatePro()}
+                        className="px-4 py-1.5 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-lg transition-all whitespace-nowrap"
+                      >
+                        Activate Web PRO
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
