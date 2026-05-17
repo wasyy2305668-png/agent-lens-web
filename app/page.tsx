@@ -89,27 +89,31 @@ export default function Home() {
             </button>
           </div>
 
-          {/* ✨ 零摩擦測試範例：注入微互動生命力 */}
-          <div className="mt-5 flex flex-wrap items-center justify-center gap-3 text-xs sm:text-sm font-medium">
-            <span className="text-neutral-400">💡 Try these famous fluff examples:</span>
-            <button 
-              onClick={() => setUrl("https://sallysbakingaddiction.com/chewy-chocolate-chip-cookies/")}
-              className="rounded-full bg-orange-50 border border-orange-100 px-4 py-1.5 text-orange-600 transition-all hover:bg-orange-100 hover:-translate-y-0.5 hover:shadow-sm active:scale-95"
-            >
-              🍪 Sally's Cookies
-            </button>
-            <button 
-              onClick={() => setUrl("https://pinchofyum.com/the-best-detox-crockpot-lentil-soup/")}
-              className="rounded-full bg-emerald-50 border border-emerald-100 px-4 py-1.5 text-emerald-600 transition-all hover:bg-emerald-100 hover:-translate-y-0.5 hover:shadow-sm active:scale-95"
-            >
-              🍲 Pinch of Yum
-            </button>
-            <button 
-              onClick={() => setUrl("https://www.allrecipes.com/recipe/10813/best-chocolate-chip-cookies/")}
-              className="rounded-full bg-blue-50 border border-blue-100 px-4 py-1.5 text-blue-600 transition-all hover:bg-blue-100 hover:-translate-y-0.5 hover:shadow-sm active:scale-95"
-            >
-              🍽️ Allrecipes Classic
-            </button>
+          {/* ✨ 零摩擦測試範例：全機型完美置中排版 */}
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 w-full">
+            <span className="text-xs font-semibold tracking-wide text-neutral-400 uppercase">
+              💡 Try these famous fluff examples:
+            </span>
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 w-full max-w-lg">
+              <button 
+                onClick={() => setUrl("https://sallysbakingaddiction.com/chewy-chocolate-chip-cookies/")}
+                className="rounded-full bg-orange-50 border border-orange-100 px-4 py-1.5 text-xs sm:text-sm text-orange-600 font-medium transition-all hover:bg-orange-100 hover:-translate-y-0.5 hover:shadow-sm active:scale-95"
+              >
+                🍪 Sally's Cookies
+              </button>
+              <button 
+                onClick={() => setUrl("https://pinchofyum.com/the-best-detox-crockpot-lentil-soup/")}
+                className="rounded-full bg-emerald-50 border border-emerald-100 px-4 py-1.5 text-xs sm:text-sm text-emerald-600 font-medium transition-all hover:bg-emerald-100 hover:-translate-y-0.5 hover:shadow-sm active:scale-95"
+              >
+                🍲 Pinch of Yum
+              </button>
+              <button 
+                onClick={() => setUrl("https://www.allrecipes.com/recipe/10813/best-chocolate-chip-cookies/")}
+                className="rounded-full bg-blue-50 border border-blue-100 px-4 py-1.5 text-xs sm:text-sm text-blue-600 font-medium transition-all hover:bg-blue-100 hover:-translate-y-0.5 hover:shadow-sm active:scale-95"
+              >
+                🍽️ Allrecipes
+              </button>
+            </div>
           </div>
         </div>
 
