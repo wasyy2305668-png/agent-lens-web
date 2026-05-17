@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 
-// 🧠 本地資料庫：0 成本、0 延遲，100% 繞過 Cloudflare
+// 🧠 本地資料庫：0 成本、0 延遲，100% 繞過 Cloudflare，誘餌專用
 const MOCK_RECIPES: Record<string, string> = {
   sally: `🍪 Chewy Chocolate Chip Cookies
 
@@ -70,7 +70,7 @@ export default function Home() {
     setLoading(true);
     setResult(null);
 
-    // 判斷是否為我們的黃金範例網址（不管是用按鈕點，還是手動貼網址都攔截）
+    // 1. 🧠 黃金範例攔截（誘餌保持無限次免費）
     let finalKey = key;
     if (!finalKey) {
       if (targetUrl.includes('sallysbakingaddiction.com')) finalKey = 'sally';
@@ -89,7 +89,29 @@ export default function Home() {
       return;
     }
 
-    // 真實網址才走 API
+    // 2. 🚨 啟動「無情 2 次斷糧晶片」（保護你 7 鎂的 Render 伺服器）
+    const today = new Date().toDateString();
+    const localUsage = localStorage.getItem('purifier_usage');
+    let usageData = localUsage ? JSON.parse(localUsage) : { date: today, count: 0 };
+
+    // 換日重置
+    if (usageData.date !== today) {
+      usageData = { date: today, count: 0 };
+    }
+
+    // 只要超過 2 次，直接鎖死，噴出付費通知
+    if (usageData.count >= 2) {
+      setTimeout(() => {
+        setResult({
+          cleaned_content: `⚠️ FREE TIER LIMIT REACHED (2/2)\n\nCustom URL purification is capped at 2 free searches per day to prevent server abuse.\n\nTo unlock unlimited processing on any website, please upgrade to PRO or use our 1-Click Chrome Extension below.`,
+          token_saved_percent: '0.00%'
+        });
+        setLoading(false);
+      }, 200);
+      return;
+    }
+
+    // 3. 額度還夠，放行戳你的 Render 真實後端 API
     try {
       const res = await fetch('https://agent-lens-api.onrender.com/api/v1/clean', {
         method: 'POST',
@@ -97,6 +119,11 @@ export default function Home() {
         body: JSON.stringify({ url: targetUrl })
       });
       const data = await res.json();
+      
+      // 成功扣除一次免費額度並寫入硬碟
+      usageData.count += 1;
+      localStorage.setItem('purifier_usage', JSON.stringify(usageData));
+      
       setResult(data);
     } catch (error) {
       alert("Server is busy cooking. Try again in 10 seconds!");
@@ -114,7 +141,7 @@ export default function Home() {
   const previewText = getCleanedText();
 
   const downloadToNotes = () => {
-    if (!previewText) return;
+    if (!previewText || previewText.includes('LIMIT REACHED')) return;
     const element = document.createElement("a");
     const file = new Blob([previewText], { type: 'text/plain;charset=utf-8' });
     element.href = URL.createObjectURL(file);
@@ -125,7 +152,7 @@ export default function Home() {
   };
 
   const copyToClipboard = () => {
-    if (!previewText) return;
+    if (!previewText || previewText.includes('LIMIT REACHED')) return;
     navigator.clipboard.writeText(previewText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -171,7 +198,7 @@ export default function Home() {
             </button>
           </div>
 
-          {/* ✨ 零摩擦測試範例：全機型完美置中排版 */}
+          {/* ✨ 零摩擦測試範例 */}
           <div className="mt-6 flex flex-col items-center justify-center gap-3 w-full">
             <span className="text-xs font-semibold tracking-wide text-neutral-400 uppercase">
               💡 Try these famous fluff examples:
@@ -223,31 +250,33 @@ export default function Home() {
             
             <div className="flex items-center justify-between">
               <h2 className="text-lg text-neutral-800 font-bold tracking-tight">Purified Content Box</h2>
-              <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full font-semibold animate-pulse">
-                {result.token_saved_percent ?? '90%'} Bloat Removed
+              <span className={`text-xs px-2.5 py-1 rounded-full font-semibold animate-pulse ${previewText.includes('LIMIT REACHED') ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}`}>
+                {previewText.includes('LIMIT REACHED') ? 'Access Blocked' : (result.token_saved_percent ?? '95.00%') + ' Bloat Removed'}
               </span>
             </div>
 
             {/* 文本預覽區 */}
             {previewText && (
-              <div className="relative p-4 bg-neutral-50 rounded-xl border border-neutral-100 overflow-hidden shadow-inner">
-                <div className="text-sm text-neutral-700 font-sans h-64 overflow-y-auto overflow-x-hidden break-words whitespace-pre-wrap p-1 leading-relaxed antialiased">
+              <div className={`relative p-4 rounded-xl border overflow-hidden shadow-inner ${previewText.includes('LIMIT REACHED') ? 'bg-red-50/50 border-red-100' : 'bg-neutral-50 border-neutral-100'}`}>
+                <div className={`text-sm font-sans h-64 overflow-y-auto overflow-x-hidden break-words whitespace-pre-wrap p-1 leading-relaxed antialiased ${previewText.includes('LIMIT REACHED') ? 'text-red-700 font-semibold' : 'text-neutral-700'}`}>
                   {previewText.substring(0, 3000)}
                 </div>
               </div>
             )}
 
-            {/* 手機操作列 */}
+            {/* 手機操作列 (鎖死狀態下按鈕會反灰不能點) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <button 
                 onClick={downloadToNotes}
-                className="py-3 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-95"
+                disabled={previewText.includes('LIMIT REACHED')}
+                className="py-3 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 📥 Download for Notes
               </button>
               <button 
                 onClick={copyToClipboard}
-                className="py-3 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-95"
+                disabled={previewText.includes('LIMIT REACHED')}
+                className="py-3 bg-neutral-100 hover:bg-neutral-200 border border-neutral-200 text-neutral-700 text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {copied ? '✅ Copied!' : '📋 Copy to Clipboard'}
               </button>
